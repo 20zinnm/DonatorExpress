@@ -14,18 +14,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 public class Main extends JavaPlugin implements Listener {
 	Connection con;
 	private static HashMap<String, String> captions;
+	
+	public static boolean update = false;
+	public static String name = "";
 	
 	public void onEnable()
 	{
@@ -64,9 +68,8 @@ public class Main extends JavaPlugin implements Listener {
 				getDataFolder().mkdirs();
 				ranks=this.getConfig().getStringList("ranks");
 				
-				if(!existingRanks.exists())
+				if(existingRanks.exists())
 				{
-					existingRanks.createNewFile();
 					FileConfiguration existingRanksConfig = null;
 					existingRanksConfig=new YamlConfiguration();
 					existingRanksConfig.load(existingRanks);
@@ -100,10 +103,10 @@ public class Main extends JavaPlugin implements Listener {
 			}
 		}
 		getCommand("donate").setExecutor(new CommandListener(this));
+		
 		Bukkit.getPluginManager().registerEvents(this, this);
 		
 		getServer().dispatchCommand(getServer().getConsoleSender(), "donate dbconnect");
-		//getServer().dispatchCommand(getServer().getConsoleSender(), "donate update");
 		
 		if(this.getConfig().getString("metrics").equals("true"))
 		{
@@ -280,12 +283,21 @@ public class Main extends JavaPlugin implements Listener {
 	
 	@SuppressWarnings("unused")
 	@EventHandler
-	public void onPlayerJoin(PlayerLoginEvent e)
+	public void onPlayerJoin(PlayerJoinEvent e)
 	{
 		BukkitTask task = new Expire(e, this).runTaskLater(this, 20);
-		if(e.getPlayer().hasPermission("donexpress.admin.update"))
+		
+		if(this.getConfig().getBoolean("update-check")||this.getConfig().getString("update-check").equals("true"))
 		{
-			BukkitTask update = new Update(e, this).runTaskLater(this, 20);
+			if(e.getPlayer().hasPermission("donexpress.admin.update"))
+			{
+				Updater updater = new Updater(this, "donator-express", this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false); // Start Updater but just do a version check
+				update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE; // Determine if there is an update ready for us
+				name = updater.getLatestVersionString(); // Get the latest version
+				e.getPlayer().sendMessage(ChatColor.YELLOW+"An update for DonatorExpress is available");
+				e.getPlayer().sendMessage(ChatColor.YELLOW+"New version: "+name);
+				e.getPlayer().sendMessage(ChatColor.YELLOW+"Download it here: http://dev.bukkit.org/bukkit-plugins/donator-express");
+			}
 		}
 	}
 }

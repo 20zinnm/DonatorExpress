@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginLoader;
+
+import com.avaje.ebean.EbeanServer;
 
 public class CommandListener implements Listener, CommandExecutor {
 
@@ -944,12 +951,14 @@ public class CommandListener implements Listener, CommandExecutor {
 						
 						statement.execute("INSERT INTO packages_purchased (username, tokens, rank, date) VALUES ('"+sender.getName()+"', '"+rankInt+"', '"+rank+"', '"+date+"')");
 						
-						if(newFileConfig.getBoolean("expire")||newFileConfig.getString("expire").equals("true"))
-						{
-							statement.execute("INSERT INTO expire_packages (username, package, date) VALUES ('"+sender.getName()+"', '"+rank+"', '"+date+"')");
-						}
 						sendMessage=true;
 					}
+					
+					if(newFileConfig.getBoolean("expire")||newFileConfig.getString("expire").equals("true"))
+					{
+						statement.execute("INSERT INTO expire_packages (username, package, date) VALUES ('"+sender.getName()+"', '"+rank+"', '"+date+"')");
+					}
+					
 					if(sendMessage==true)
 					{
 						String username="'"+sender.getName()+"'";						
@@ -1519,4 +1528,5 @@ public class CommandListener implements Listener, CommandExecutor {
 		sender.sendMessage(prefix()+ChatColor.YELLOW
 				+ "Error. You do not have permission to do that!");
 	}
+
 }

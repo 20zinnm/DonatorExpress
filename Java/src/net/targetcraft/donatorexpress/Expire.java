@@ -19,20 +19,21 @@ import java.util.logging.Logger;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class Expire extends BukkitRunnable {
 	
 	static Main plugin;
-	static PlayerLoginEvent e;
+	static PlayerJoinEvent e;
 
 	static Connection con;
 
-	public Expire(PlayerLoginEvent e, Main config) 
+	public Expire(PlayerJoinEvent e2, Main config) 
 	{
 		plugin = config;
-		Expire.e = e;
+		Expire.e = e2;
 	}
 
 	public void connectTodb()
