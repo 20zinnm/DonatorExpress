@@ -2,31 +2,31 @@
 ADDATTEMPTING : 'Tentative d'ajout'
 
 
-ALREADYEXISTS : 'Erreur. Package existe déjà'
+ALREADYEXISTS : 'Erreur. Package existe dÃ©jÃ '
 
 
 CANCEL1 : 'Annulation en cours ...'
 
 
-CANCEL2 : 'Annulé la suppression du paquet'
+CANCEL2 : 'AnnulÃ© la suppression du paquet'
 
 
-CANCEL3 : 'Erreur. Vous n'avez pas demandé pour un paquet doit être supprimé'
+CANCEL3 : 'Erreur. Vous n'avez pas demandÃ© pour un paquet doit Ãªtre supprimÃ©'
 
 
-CANCEL4 : 'Erreur. Vous n'avez pas commencé à l'achat d'un forfait'
+CANCEL4 : 'Erreur. Vous n'avez pas commencÃ© Ã  l'achat d'un forfait'
 
 
-CANCEL5 : 'Erreur. Vous n'avez pas demandé pour un paquet doit être supprimé'
+CANCEL5 : 'Erreur. Vous n'avez pas demandÃ© pour un paquet doit Ãªtre supprimÃ©'
 
 
-CANCEL6 : 'Annulé la suppression du paquet'
+CANCEL6 : 'AnnulÃ© la suppression du paquet'
 
 
-CANCEL7 : 'Erreur. Vous n'avez pas demandé pour un paquet doit être supprimé'
+CANCEL7 : 'Erreur. Vous n'avez pas demandÃ© pour un paquet doit Ãªtre supprimÃ©'
 
 
-CANCEL8 : 'Erreur. Vous n'avez pas commencé à l'achat d'un forfait'
+CANCEL8 : 'Erreur. Vous n'avez pas commencÃ© Ã  l'achat d'un forfait'
 
 
 COMMANDUSAGE : 'Utilisation de la commande correcte'
@@ -38,13 +38,13 @@ CURRENTLISTPACKAGES1 : 'Liste actuelle des colis:'
 CURRENTLISTPACKAGES2 : 'Pour afficher une description de chaque paquet, tapez /donate info [packageName]'
 
 
-DBERROR : 'Erreur lors de la tentative de connexion à la base de données'
+DBERROR : 'Erreur lors de la tentative de connexion Ã  la base de donnÃ©es'
 
 
 DONATOREXPRESS : 'DonatorExpress'
 
 
-HOWMUCH1 : 'Cela coûte article:'
+HOWMUCH1 : 'Cela coÃ»te article:'
 
 
 HOWMUCH2 : 'Tapez /donate confirm si vous souhaitez acheter cet objet. Pour annuler cet achat, le type /donate cancel'
@@ -53,7 +53,7 @@ HOWMUCH2 : 'Tapez /donate confirm si vous souhaitez acheter cet objet. Pour annu
 INVALIDSYNTAX : 'Erreur. Une syntaxe non valide. Tapez /donate help pour les commandes'
 
 
-NOACCOUNT1 : 'Vous n'avez pas de compte DonatorExpress. S'il vous plaît visitez:'
+NOACCOUNT1 : 'Vous n'avez pas de compte DonatorExpress. S'il vous plaÃ®t visitez:'
 
 
 NOACCOUNT2 : 's'inscrire'
@@ -65,25 +65,25 @@ NOTENOUGH : 'Vous n'avez pas assez'
 NOWHAVE : 'Vous avez maintenant:'
 
 
-PACAKGENOTPURCHASED : 'Erreur. Vous n'avez pas encore acheté un forfait évolutif ou il n'ya pas plus de paquets à mettre à jour'
+PACAKGENOTPURCHASED : 'Erreur. Vous n'avez pas encore achetÃ© un forfait Ã©volutif ou il n'ya pas plus de paquets Ã  mettre Ã  jour'
 
 
-PACKAGEALREADYPURCHASED : 'Erreur. Vous avez déjà acheté ce package'
+PACKAGEALREADYPURCHASED : 'Erreur. Vous avez dÃ©jÃ  achetÃ© ce package'
 
 
-PACKAGENOTFOUND : 'Je ne pouvais pas trouver ce package. S'il vous plaît essayer de nouveau.'
+PACKAGENOTFOUND : 'Je ne pouvais pas trouver ce package. S'il vous plaÃ®t essayer de nouveau.'
 
 
 PACKAGENOTTHERE : 'Erreur. Package n'est pas actuellement dans le fichier packages.yml.'
 
 
-PLUGINDISABLED : 'DonatorExpress désactivée. Recharger serveur pour permettre à nouveau'
+PLUGINDISABLED : 'DonatorExpress dÃ©sactivÃ©e. Recharger serveur pour permettre Ã  nouveau'
 
 
 REMOVE1 : 'Pour confirmer la suppression de ce package, tapez /donate confirmdel'
 
 
-REMOVE2 : 'Cela ne peut pas être annulée'
+REMOVE2 : 'Cela ne peut pas Ãªtre annulÃ©e'
 
 
 REMOVE3 : 'Ou type /donate cancel pour annuler'
@@ -92,7 +92,7 @@ REMOVE3 : 'Ou type /donate cancel pour annuler'
 REMOVEATTEMPTING : 'Tenter de retirer'
 
 
-REQUESTREMOVENOTDONE : 'Erreur. Vous n'avez pas demandé pour un paquet doit être supprimé'
+REQUESTREMOVENOTDONE : 'Erreur. Vous n'avez pas demandÃ© pour un paquet doit Ãªtre supprimÃ©'
 
 
 SUCCESS : 'Sucess!'
@@ -101,10 +101,10 @@ SUCCESS : 'Sucess!'
 TOKENSRETURN : 'Vous avez actuellement:'
 
 
-UPGRADETO1 : 'Vous mettez à niveau'
+UPGRADETO1 : 'Vous mettez Ã  niveau'
 
 
-UPGRADETO2 : 'dont les coûts'
+UPGRADETO2 : 'dont les coÃ»ts'
 
 
-USERNOTFOUND : 'L'utilisateur n'a pas été trouvé dans la base de données'
+USERNOTFOUND : 'L'utilisateur n'a pas Ã©tÃ© trouvÃ© dans la base de donnÃ©es'

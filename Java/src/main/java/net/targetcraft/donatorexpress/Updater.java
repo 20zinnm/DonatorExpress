@@ -7,7 +7,6 @@ package net.targetcraft.donatorexpress;
 */
 
 import java.io.*;
-import java.lang.IllegalThreadStateException;
 import java.lang.Runnable;
 import java.lang.Thread;
 import java.net.MalformedURLException;

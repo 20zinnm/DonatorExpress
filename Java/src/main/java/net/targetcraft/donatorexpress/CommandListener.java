@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -32,12 +31,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
-
-import com.avaje.ebean.EbeanServer;
 
 public class CommandListener implements Listener, CommandExecutor {
 
@@ -126,7 +119,7 @@ public class CommandListener implements Listener, CommandExecutor {
 		}
 	}
 
-	@Override
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {		
 		if(cmd.getName().equalsIgnoreCase("donate"))
 		{			
