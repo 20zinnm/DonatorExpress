@@ -13,8 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,43 +25,16 @@ public class Expire extends BukkitRunnable {
 	static Main plugin;
 	static PlayerJoinEvent e;
 
-	static Connection con;
-
 	public Expire(PlayerJoinEvent e2, Main config) 
 	{
 		plugin = config;
 		Expire.e = e2;
 	}
 
-	public void connectTodb()
-	{
-		File configYaml = new File(plugin.getDataFolder()+File.separator, "config.yml");
-		FileConfiguration config=null;
-		config=new YamlConfiguration();
-		try {
-			config.load(configYaml);
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InvalidConfigurationException e1) {
-			e1.printStackTrace();
-		}
-		
-		String dbUsername = config.getString("db-username");
-		String dbPassword = config.getString("db-password");
-		String dbHost = config.getString("db-host");
-		String dbName = config.getString("db-name");
-		String dbURL = "jdbc:mysql://" + dbHost + "/" + dbName;
-		
-		try {
-			con = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}	
 	public void run()
 	{
+		Database.connect();
+		
 		File configYaml = new File(plugin.getDataFolder()+File.separator, "config.yml");
 		FileConfiguration config=null;
 		config=new YamlConfiguration();
@@ -77,13 +48,10 @@ public class Expire extends BukkitRunnable {
 			e2.printStackTrace();
 		}
 		
-		connectTodb();
 		try {
-			Statement statement=null;
 			String username=e.getPlayer().getName().toString();
-			statement=con.createStatement();
-			statement.execute("CREATE TABLE IF NOT EXISTS `expire_packages` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `package` varchar(50) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
-			ResultSet result=statement.executeQuery("SELECT `package`, `date` FROM expire_packages  WHERE username = '"+username+"'");
+			Database.execute("CREATE TABLE IF NOT EXISTS `expire_packages` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `package` varchar(50) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
+			ResultSet result=Database.executeStatement("SELECT `package`, `date` FROM expire_packages  WHERE username = '"+username+"'");
 			while(result.next())
 			{
 				String dateGet=result.getString(2);
@@ -118,7 +86,7 @@ public class Expire extends BukkitRunnable {
 						for(String s:expireCommands)
 						{
 							plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), s.replace("%player", e.getPlayer().getName().toString()));
-							statement.execute("DELETE FROM expire_packages WHERE username='"+username+"' AND date='"+dateGet+"'");
+							Database.execute("DELETE FROM expire_packages WHERE username='"+username+"' AND date='"+dateGet+"'");
 						}
 						String prefix=plugin.getConfig().getString("prefix");
 						prefix=prefix.replaceAll("&([l-o0-9a-f])", "\u00A7$1");
@@ -129,8 +97,6 @@ public class Expire extends BukkitRunnable {
 					}
 	    		}				
 			}
-			//statement.close();
-			con.close();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		} catch (ParseException e1) {
@@ -142,10 +108,13 @@ public class Expire extends BukkitRunnable {
 		} catch (InvalidConfigurationException e1) {
 			e1.printStackTrace();
 		}
+		Database.close();
 	}
 	
 	public void forumDerank(String group) throws FileNotFoundException, IOException, InvalidConfigurationException
 	{
+		Database.connect();
+		
 		File forumGroup = new File(plugin.getDataFolder()+"/packages"+File.separator, group+".yml");
 		File forumConfig = new File(plugin.getDataFolder()+File.separator, "forumConfig.yml");
 		
@@ -172,10 +141,8 @@ public class Expire extends BukkitRunnable {
 				forumdb = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
 				
 				statement=forumdb.createStatement();
-				Logger.getLogger("").log(Level.INFO, "It gets to here");
 				if(forumConfigYaml.getString("mybb").equals("true"))
 				{
-					Logger.getLogger("").log(Level.INFO, "Its knows its mybb");					
 					String groupName=forumGroupYaml.getString("forum-expire-group");
 					
 					String prefix=forumConfigYaml.getString("db-prefix");
@@ -186,9 +153,7 @@ public class Expire extends BukkitRunnable {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -209,9 +174,7 @@ public class Expire extends BukkitRunnable {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -232,9 +195,7 @@ public class Expire extends BukkitRunnable {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -281,9 +242,7 @@ public class Expire extends BukkitRunnable {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -304,9 +263,7 @@ public class Expire extends BukkitRunnable {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{

@@ -104,9 +104,11 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		getCommand("donate").setExecutor(new CommandListener(this));
 		
-		Bukkit.getPluginManager().registerEvents(this, this);
+		//Used to initialize the constructor
+		@SuppressWarnings("unused")
+		Database testConnect = new Database(this);
 		
-		getServer().dispatchCommand(getServer().getConsoleSender(), "donate dbconnect");
+		Bukkit.getPluginManager().registerEvents(this, this);
 		
 		if(this.getConfig().getString("metrics").equals("true"))
 		{

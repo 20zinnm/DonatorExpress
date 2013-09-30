@@ -17,20 +17,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class CommandListener implements Listener, CommandExecutor {
 
@@ -39,8 +37,6 @@ public class CommandListener implements Listener, CommandExecutor {
 	public CommandListener(Main config) {
 		plugin = config;
 	}
-
-	Connection con;
 	
 	HashMap<String, Boolean> confirm = new HashMap<String, Boolean>();
 	HashMap<String, Integer> rankIntMap = new HashMap<String, Integer>();
@@ -68,57 +64,6 @@ public class CommandListener implements Listener, CommandExecutor {
     String CURRENTLISTPACKAGES1=null;
     String CURRENTLISTPACKAGES2=null;
     String DBERROR=null;
-    
-
-	public void connectToDatabase() {		
-		/**
-		languageConfig=new YamlConfiguration();
-		try {
-			languageConfig.load(language);
-		} catch (FileNotFoundException e1) {
-			try {
-				Logger.getLogger("").warning("[DonatorExpress] Could not find the language specified in the config. Using English");
-				languageConfig.load(english);
-			} catch (IOException
-					| InvalidConfigurationException e) {
-				e.printStackTrace();
-			}
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InvalidConfigurationException e1) {
-			e1.printStackTrace();
-		}
-		*/
-		String dbUsername = plugin.getConfig().getString("db-username");
-		String dbPassword = plugin.getConfig().getString("db-password");
-		String dbHost = plugin.getConfig().getString("db-host");
-		String dbName = plugin.getConfig().getString("db-name");
-		String dbURL = "jdbc:mysql://" + dbHost + "/" + dbName;
-		try {
-			con = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
-		} catch (SQLException e) {
-			Logger.getLogger(plugin.getDataFolder()+"log.log").log(Level.SEVERE, "Error while trying to connect to the database");			
-			e.printStackTrace();
-			Logger.getLogger(plugin.getDataFolder()+"log.log").log(Level.SEVERE, "Error while trying to connect to the database.");
-		    
-			if(plugin.getConfig().getBoolean("disable-on-database-error"))
-			{
-				plugin.getPluginLoader().disablePlugin(plugin);
-				Logger.getLogger(plugin.getDataFolder()+"log.log").log(Level.SEVERE, "DonatorExpress disabled. Reload server to re enable");
-			}
-
-		}
-	}
-
-	public void closeDatabase() {
-		try {
-			con.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {		
 		if(cmd.getName().equalsIgnoreCase("donate"))
@@ -396,19 +341,16 @@ public class CommandListener implements Listener, CommandExecutor {
 			}
 			else if (args[0].equalsIgnoreCase("check"))
 			{
+				Database.connect();
 				if(sender.hasPermission("donexpress.user"))
 				{
 					if(sender instanceof Player)
 					{
 						String VCName=plugin.getConfig().getString("currency-name");
 						String website=plugin.getConfig().getString("portal-location");
-						Statement statement=null;
 						String username="'"+sender.getName()+"'";
-						try {
-
-							statement=con.createStatement();
-						
-							ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+						try {						
+							ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 							if(result.next())
 							{
 								sender.sendMessage(prefix()+ChatColor.AQUA+"You currently have: "+result.getString(1)+" "+VCName);
@@ -417,9 +359,7 @@ public class CommandListener implements Listener, CommandExecutor {
 							{
 								sender.sendMessage(prefix()+ChatColor.YELLOW+"You do not have a DonatorExpress account. Please visit "+website+" to register.");
 							}
-							statement.close();
 						} catch (SQLException e) {
-							connectToDatabase();
 							sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");
 							e.printStackTrace();
 						} catch (ArrayIndexOutOfBoundsException e)
@@ -432,20 +372,21 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					noPermission(sender);
 				}
+				Database.close();
 			}
 			else if (args[0].equalsIgnoreCase("checkvc"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.admin.checkvc"))
 				{
 				String VCName=plugin.getConfig().getString("currency-name");
-			    String website=plugin.getConfig().getString("portal-location");
-				Statement statement = null;				
+			    String website=plugin.getConfig().getString("portal-location");			
 				if(!(args[1]==null))
 				{
 					String username="'"+args[1]+"'";
 					try {
-						statement=con.createStatement();
-						ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+						ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 						if(result.next())
 						{
 							sender.sendMessage(prefix()+ChatColor.AQUA+args[1]+" currently has "+result.getString(1)+" "+VCName);
@@ -455,7 +396,6 @@ public class CommandListener implements Listener, CommandExecutor {
 							sender.sendMessage(prefix()+ChatColor.YELLOW+"I could not find that username in the database. Please tell the player to register at "+website);
 						}
 					} catch (SQLException e) {
-						connectToDatabase();
 						sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");
 						e.printStackTrace();
 					} catch (ArrayIndexOutOfBoundsException e)
@@ -472,16 +412,17 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					noPermission(sender);
 				}
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("checkp"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.admin.checkp"))
 				{
-					Statement statement=null;
 					try {
-						statement=con.createStatement();
 						String username="'"+args[1]+"'";
-						ResultSet result=statement.executeQuery("SELECT `rank`, `date` FROM packages_purchased  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `rank`, `date` FROM packages_purchased  WHERE username = '"+username+"'");
 						sender.sendMessage(prefix()+args[1]+"'s package buys:");
 						while(result.next())
 						{
@@ -493,19 +434,20 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					
 				}
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("addvc"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.admin.addvc"))
 				{
 				String website=plugin.getConfig().getString("portal-location");
 				String VCName=plugin.getConfig().getString("currency-name");
-				Statement statement=null;
 				try {
-					statement=con.createStatement();
 					String username="'"+args[1]+"'";
 					int currentTokens = 0;
-					ResultSet result1=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+					ResultSet result1=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 					if(result1.next())
 					{
 						String tokens=result1.getString(1);
@@ -519,17 +461,15 @@ public class CommandListener implements Listener, CommandExecutor {
 					int tokensFinal=currentTokens+tokensToAdd;
 					sender.sendMessage(prefix()+ChatColor.YELLOW+"Attempting to give "+args[1]+" "+args[2]+" "+VCName);
 					String tokens="'"+tokensFinal+"'";
-					statement.executeUpdate("UPDATE dep SET tokens="+tokens+"where username="+username);
+					Database.executeUpdate("UPDATE dep SET tokens="+tokens+"where username="+username);
 					
-					ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+					ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 					if(result.next())
 					{
 						sender.sendMessage(prefix()+ChatColor.GREEN+"Success!");
 						sender.sendMessage(prefix()+ChatColor.AQUA+args[1]+" now has "+result.getString(1)+" "+VCName);
 					}
-					statement.close();
 				} catch (SQLException e) {
-					connectToDatabase();
 					sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");				} catch (ArrayIndexOutOfBoundsException e)
 				{
 					sender.sendMessage(prefix()+"Error. Invalid syntax. Type "+ChatColor.GREEN+"/donate help "+ChatColor.RED+"for commands");
@@ -542,25 +482,26 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					
 				}
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("setvc"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.admin.setvc"))
 				{
 					String website=plugin.getConfig().getString("portal-location");
 					String VCName=plugin.getConfig().getString("currency-name");
-					Statement statement=null;
 					try {
-						statement=con.createStatement();
 						String username="'"+args[1]+"'";
-						ResultSet result1=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+						ResultSet result1=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 						if(result1.next())
 						{
 							sender.sendMessage(prefix()+ChatColor.YELLOW+"Attempting to set "+args[1]+"'s "+VCName+" with "+args[2]+" "+VCName);
 							String tokens="'"+args[2]+"'";
-							statement.executeUpdate("UPDATE dep SET tokens="+tokens+"where username="+username);
+							Database.executeUpdate("UPDATE dep SET tokens="+tokens+"where username="+username);
 							
-							ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+							ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 							if(result.next())
 							{
 								sender.sendMessage(prefix()+ChatColor.GREEN+"Success!");
@@ -571,73 +512,20 @@ public class CommandListener implements Listener, CommandExecutor {
 						{
 							sender.sendMessage(prefix()+ChatColor.YELLOW+"I could not find that username in the database. Please tell the player to register at "+website);
 						}
-						statement.close();
 					} catch (SQLException e)
 					{
-						connectToDatabase();
 						sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");					} catch (ArrayIndexOutOfBoundsException e)
 					{
 						sender.sendMessage(prefix()+"Error. Correct command usage is "+ChatColor.GREEN+"/donate editvc [username] [amount]");
 					}
 				}
+				Database.close();
 			}
-			//TODO
-			/**
-			else if(args[0].equalsIgnoreCase("ranks"))
-			{
-				if(sender instanceof Player)
-				{
-				sender.sendMessage(ChatColor.RED+"[DonatorExpress] "+ChatColor.YELLOW+"You can afford these ranks:");
-				String website=plugin.getConfig().getString("portal-location");
-				if(sender.hasPermission("donexpress.user"))
-				{
-					Statement statement = null;				
-					String username="'"+sender.getName()+"'";
-					String tokens;
-					int tokensInt = 0;
-					try {			
-						statement=con.createStatement();
-						ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
-						if(result.next())
-						{
-							tokens=result.getString(1);
-							tokensInt=Integer.parseInt(tokens);
-						}
-						else
-						{
-							sender.sendMessage(ChatColor.RED+"[DonatorExpress] "+ChatColor.YELLOW+"I could not find your username in the database. Please register at "+website);
-						}
-						List<String>ranks = plugin.getConfig().getStringList("ranks");
-						for(String s:ranks)
-						{
-							plugin.getConfig().getInt(s);
-							int rankInt=Integer.parseInt(s);
-							if(rankInt>=tokensInt)
-							{
-								sender.sendMessage(ChatColor.AQUA+s);
-							}
-							else
-							{
-								
-							}
-						}
-						
-						statement.close();
-					} catch (SQLException e) {
-						connectToDatabase();
-						sender.sendMessage(ChatColor.RED+"[DonatorExpress] "+ChatColor.YELLOW+"Error. Could not connect to database. Attempting to reconnect. Try your command again");
-						e.printStackTrace();
-					}
-					}
-				}
-				else
-				{
-					sender.sendMessage(ChatColor.RED+"Error. This can only be preformed by a player");
-				}
-			}
-			*/
+			
 			else if(args[0].equalsIgnoreCase("buy"))
 			{
+				Database.connect();
+				
 				String VCName=plugin.getConfig().getString("currency-name");
 				if(sender.hasPermission("donexpress.user"))
 				{
@@ -710,12 +598,9 @@ public class CommandListener implements Listener, CommandExecutor {
 						    }
 						    if(count==1)
 						    {
-								Statement statement=null;
 								String username="'"+sender.getName()+"'";
-								try {
-									statement=con.createStatement();
-										
-									ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+								try {										
+									ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 									if(result.next())
 									{
 										String tokens=result.getString(1);
@@ -742,14 +627,11 @@ public class CommandListener implements Listener, CommandExecutor {
 									{
 										sender.sendMessage(prefix()+ChatColor.RED+"Error. You have not registered at "+VCName+", or the Server Owner/Administrator has not correctly set up DonatorExpress");
 									}
-									statement.close();
 								} catch (SQLException e) {
-									connectToDatabase();
 									sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");								
 									e.printStackTrace();
 								} catch (NullPointerException e)
 								{
-									connectToDatabase();
 									sender.sendMessage(prefix()+"Hm. I can't connect to the database. Your server owner may have incorrectly setup the config. Please let him/her know right now!");
 									e.printStackTrace();
 								} catch (ArrayIndexOutOfBoundsException e)
@@ -778,10 +660,12 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					noPermission(sender);
 				}
-				
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("upgrade"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.user"))
 				{
 					if(sender instanceof Player)
@@ -828,12 +712,9 @@ public class CommandListener implements Listener, CommandExecutor {
 							    }
 							    if(count==1)
 							    {
-									Statement statement=null;
 									String username="'"+sender.getName()+"'";
-									try {
-										statement=con.createStatement();
-											
-										ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+									try {											
+										ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 										if(result.next())
 										{
 											String tokens=result.getString(1);
@@ -860,14 +741,11 @@ public class CommandListener implements Listener, CommandExecutor {
 										{
 											sender.sendMessage(prefix()+ChatColor.RED+"Error. You have not registered at "+VCName+", or the Server Owner/Administrator has not correctly set up DonatorExpress");
 										}
-										statement.close();
 									} catch (SQLException e) {
-										connectToDatabase();
 										sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");								
 										e.printStackTrace();
 									} catch (NullPointerException e)
 									{
-										connectToDatabase();
 										sender.sendMessage(prefix()+"Hm. I can't connect to the database. Your server owner may have incorrectly setup the config, or the database is having problems. Please let him/her know right now!");
 										e.printStackTrace();
 									} catch (ArrayIndexOutOfBoundsException e)
@@ -898,20 +776,20 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					noPermission(sender);
 				}
+				Database.close();
 			}
 			
 			else if(args[0].equalsIgnoreCase("confirm"))
 			{
+				Database.connect();
+				
 				String VCName=plugin.getConfig().getString("currency-name");
 				if(sender.hasPermission("donexpress.user"))
 				{
-				//TODO Add 10 seconds in next update. Or second one. Whichever I like xD
+				//TODO Add 10 seconds in next update. Or second one. Whichever I like
 				if(sender instanceof Player)
 				{
 				try {
-					
-				Statement statement=null;
-				statement=con.createStatement();
 				if(confirm.get("sender"))
 				{
 					String rank=rankString.get("rankName");
@@ -928,8 +806,8 @@ public class CommandListener implements Listener, CommandExecutor {
 					List<String> rankCommand=newFileConfig.getStringList(("commands").replace("%player", sender.getName()));
 					boolean sendMessage=false;
 					
-					statement.execute("CREATE TABLE IF NOT EXISTS `packages_purchased` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `tokens` varchar(16) NOT NULL, `rank` varchar(16) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
-					statement.execute("CREATE TABLE IF NOT EXISTS `expire_packages` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `package` varchar(50) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
+					Database.execute("CREATE TABLE IF NOT EXISTS `packages_purchased` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `tokens` varchar(16) NOT NULL, `rank` varchar(16) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
+					Database.execute("CREATE TABLE IF NOT EXISTS `expire_packages` (`id` int NOT NULL AUTO_INCREMENT, `username` varchar(24) NOT NULL, `package` varchar(50) NOT NULL, `date` varchar(64) NOT NULL, PRIMARY KEY (id))");
 					
 					int rankInt=0;
 					rankInt=rankIntMap.get("rankInt");
@@ -941,15 +819,14 @@ public class CommandListener implements Listener, CommandExecutor {
 					for(String s:rankCommand)
 					{
 						plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), s.replace("%player", sender.getName()));
-						
-						statement.execute("INSERT INTO packages_purchased (username, tokens, rank, date) VALUES ('"+sender.getName()+"', '"+rankInt+"', '"+rank+"', '"+date+"')");
-						
+												
 						sendMessage=true;
 					}
+					Database.execute("INSERT INTO packages_purchased (username, tokens, rank, date) VALUES ('"+sender.getName()+"', '"+rankInt+"', '"+rank+"', '"+date+"')");
 					
 					if(newFileConfig.getBoolean("expire")||newFileConfig.getString("expire").equals("true"))
 					{
-						statement.execute("INSERT INTO expire_packages (username, package, date) VALUES ('"+sender.getName()+"', '"+rank+"', '"+date+"')");
+						Database.execute("INSERT INTO expire_packages (username, package, date) VALUES ('"+sender.getName()+"', '"+rank+"', '"+date+"')");
 					}
 					
 					if(sendMessage==true)
@@ -961,9 +838,9 @@ public class CommandListener implements Listener, CommandExecutor {
 						rankInt2=rankIntMap.get("rankInt");
 						String rankIntString=rankIntMap.get("rankInt").toString();
 						int finalTokens=tokensInt-rankInt2;
-						statement.executeUpdate("UPDATE dep SET tokens='"+finalTokens+"' where username='"+sender.getName()+"'");
+						Database.executeUpdate("UPDATE dep SET tokens='"+finalTokens+"' where username='"+sender.getName()+"'");
 						
-						ResultSet result=statement.executeQuery("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
+						ResultSet result=Database.executeStatement("SELECT `tokens`, `username` FROM dep  WHERE username = "+username);
 						if(result.next())
 						{
 							sender.sendMessage(prefix()+ChatColor.AQUA+"You now have: "+result.getString(1)+" "+VCName);
@@ -1008,12 +885,13 @@ public class CommandListener implements Listener, CommandExecutor {
 			    				
 			    				userDataConfig.save(userData);
 			    			}
-			    			else
+			    			else if(userData.exists())
 			    			{
 			    				userDataConfig.load(userData);
 			    				List<String>oneTimePurchase = userDataConfig.getStringList("one-time-purchases");
 			    				oneTimePurchase.add(rank);
 			    				
+			    				userDataConfig.set("current-package", rank);
 			    				userDataConfig.set("one-time-purchases", oneTimePurchase);
 			    				userDataConfig.save(userData);
 			    			}
@@ -1028,7 +906,7 @@ public class CommandListener implements Listener, CommandExecutor {
 				
 				}catch (SQLException e)
 				{
-					connectToDatabase();
+					e.printStackTrace();
 					sender.sendMessage(prefix()+ChatColor.YELLOW+"The database returned an error. Please tell an Admin or Owner about this problem so they can investigate further");					e.printStackTrace();
 				} catch (ArrayIndexOutOfBoundsException e)
 				{
@@ -1040,6 +918,7 @@ public class CommandListener implements Listener, CommandExecutor {
 				}
 				}
 			}
+				Database.close();
 			}
 			
 			/**
@@ -1111,6 +990,8 @@ public class CommandListener implements Listener, CommandExecutor {
 			*/
 			else if(args[0].equalsIgnoreCase("cancel"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.user"))
 				{
 					sender.sendMessage(ChatColor.RED+prefix()+ChatColor.YELLOW+"Cancelling...");
@@ -1184,17 +1065,17 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					noPermission(sender);
 				}
-				
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("recent"))
 			{
+				Database.connect();
+				
 				if(sender.hasPermission("donexpress.admin.recent"))
 				{
 					String VCName=plugin.getConfig().getString("currency-name");
 					try {
-						Statement statement=null;
-						statement=con.createStatement();	
-						ResultSet result=statement.executeQuery("SELECT * FROM packages_purchased ORDER BY `id` DESC LIMIT 5");
+						ResultSet result=Database.executeStatement("SELECT * FROM packages_purchased ORDER BY `id` DESC LIMIT 5");
 						sender.sendMessage(prefix()+ChatColor.YELLOW+"Last 5 transactions");
 						while(result.next())
 						{
@@ -1209,15 +1090,14 @@ public class CommandListener implements Listener, CommandExecutor {
 							sender.sendMessage(ChatColor.GOLD+"*********************************");
 							sender.sendMessage(ChatColor.GOLD+"");
 						}
-						statement.close();
 					} catch (SQLException e) {
-						connectToDatabase();
 						e.printStackTrace();
 					} catch (ArrayIndexOutOfBoundsException e)
 					{
 						sender.sendMessage(prefix()+ChatColor.RED+"Error. Invalid syntax. Type /donate help for commands");
 					}
 				}
+				Database.close();
 			}
 			else if(args[0].equalsIgnoreCase("reload"))
 			{
@@ -1235,7 +1115,7 @@ public class CommandListener implements Listener, CommandExecutor {
 			{
 				sender.sendMessage(ChatColor.YELLOW+"***************************************");
 				sender.sendMessage(ChatColor.RED+"");
-				sender.sendMessage(ChatColor.AQUA+"DonatorExpress Version 1.5");
+				sender.sendMessage(ChatColor.AQUA+"DonatorExpress Version 1.5.1");
 				sender.sendMessage(ChatColor.AQUA+"Plugin developed by: aman207");
 				sender.sendMessage(ChatColor.AQUA+"Webportal developed by: AzroWear");
 				sender.sendMessage(ChatColor.AQUA+"http://bit.ly/DonExp");
@@ -1246,25 +1126,8 @@ public class CommandListener implements Listener, CommandExecutor {
 			{
 				commandUsage(sender);
 			}
-			else if(args[0].equalsIgnoreCase("dbconnect"))
-			{
-				if(sender.hasPermission("donexpress.admin.dbconnect"))
-				{
-					connectToDatabase();
-				}
+			
 
-			}
-			else if(args[0].equals("dbcloseNEVERRUNTHIS"))
-			{
-				if(sender instanceof ConsoleCommandSender)
-				{
-					closeDatabase();
-				}
-				else
-				{
-					sender.sendMessage(ChatColor.GOLD+"Lol do you want this plugin to implode on its self? How about you don't do that ;)");
-				}
-			}
 			else
 			{
 				commandUsage(sender);
@@ -1285,6 +1148,8 @@ public class CommandListener implements Listener, CommandExecutor {
 	}
 	public void syncForum(CommandSender sender, String group)
 	{
+		Database.connect();
+		
 		File forumGroup = new File(plugin.getDataFolder()+"/packages"+File.separator, group.toLowerCase()+".yml");
 		File forumConfig = new File(plugin.getDataFolder()+File.separator, "forumConfig.yml");
 		
@@ -1319,9 +1184,7 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true")||forumConfigYaml.getBoolean("email-mode"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -1342,9 +1205,7 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true")||forumConfigYaml.getBoolean("email-mode"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -1365,9 +1226,7 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true")||forumConfigYaml.getBoolean("email-mode"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -1414,9 +1273,7 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true")||forumConfigYaml.getBoolean("email-mode"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -1437,9 +1294,7 @@ public class CommandListener implements Listener, CommandExecutor {
 					}
 					else if(forumConfigYaml.getString("email-mode").equals("true")||forumConfigYaml.getBoolean("email-mode"))
 					{
-						Statement forumStatement=null;
-						forumStatement=con.createStatement();
-						ResultSet result=forumStatement.executeQuery("SELECT `email` FROM dep  WHERE username = '"+username+"'");
+						ResultSet result=Database.executeStatement("SELECT `email` FROM dep  WHERE username = '"+username+"'");
 						String email=null;
 						while(result.next())
 						{
@@ -1453,7 +1308,7 @@ public class CommandListener implements Listener, CommandExecutor {
 				{
 					
 				}
-				statement.close();
+				Database.close();
 				forumdb.close();
 		} catch (SQLException e) {
 			sender.sendMessage(prefix()+ChatColor.RED+"Uh oh. I could not add you to a forum group. " +
@@ -1520,6 +1375,17 @@ public class CommandListener implements Listener, CommandExecutor {
 	public void noPermission(CommandSender sender) {
 		sender.sendMessage(prefix()+ChatColor.YELLOW
 				+ "Error. You do not have permission to do that!");
+	}
+	
+	public void onPlayerLogoutEvent(PlayerQuitEvent e)
+	{		
+		confirm.clear();
+		rankIntMap.clear();
+        tokensIntMap.clear();
+        rankString.clear();
+        confirmDel.clear();
+        confirmDel2.clear();
+        confirmDelBoolean.clear();
 	}
 
 }
