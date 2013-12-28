@@ -17,8 +17,9 @@ update-check: true
 
 disable-on-database-error: false
 
-# FEATURE NOT ENABLED
-# Will be in next version however
+# Available languages:
+# English (en), French (fr), Spanish (es), Dutch (du)
+# Reload the server for the language change to take effect
 language: en
 
 # Database username, password, host, and name of the database go here. 
@@ -48,10 +49,18 @@ portal-location: 'www.example.com/donate'
 
 currency-name: Tokens
 
+# How much does it cost to buy 1 token? 
+# How much does it cost to sell 1 token?
+# If this doesn't apply to you, no need to change it
+# Note these two options require vault
+
+costToBuyToken: 0.0
+costToSellToken: 0.0
+
 # The prefix that you wish to use. Be sure to put a space at the end
 
 prefix: '&c[DonatorExpress] '
 
 # Don't change this please
 
-version: 1.5
+version: 1.6

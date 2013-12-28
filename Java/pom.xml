@@ -4,11 +4,11 @@
 
   <groupId>net.targetcraft</groupId>
   <artifactId>donatorexpress</artifactId>
-  <version>1.5</version>
+  <version>1.5.1</version>
   <packaging>jar</packaging>
 
   <name>donatorexpress</name>
-  <url>http://maven.apache.org</url>
+  <url>http://targetcraft.net</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,6 +20,10 @@
           <id>bukkit-repo</id>
           <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
+        <repository>
+		<id>vault-repo</id>
+		<url>http://ci.herocraftonline.com/plugin/repository/everything</url>
+		</repository>
     </repositories>
 
   <dependencies>
@@ -33,7 +37,12 @@
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
             <!-- Bukkit API Version, change if necessary -->
-            <version>1.6.4-R0.1-20130923.182036-4</version>
+            <version>1.7.2-R0.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.milkbowl.vault</groupId>
+		<artifactId>Vault</artifactId>
+		<version>1.2.27</version>
     </dependency>
   </dependencies>
 

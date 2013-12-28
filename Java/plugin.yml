@@ -1,10 +1,11 @@
 name: DonatorExpress
 main: net.targetcraft.donatorexpress.Main
-version: 1.5.1
+version: 1.6
 description: DonatorExpress
 website: http://dev.bukkit.org/bukkit-plugins/donator-express/
 author: aman207
 authors: [AzroWear] 
+softdepend: [Vault]
 
 commands:
     donate:
@@ -16,7 +17,6 @@ permissions:
         children:
             donexpress.admin.*: true
             donexpress.user: true
-        default: op
     donexpress.admin.*:
         description: Access to all admin commands
         default: op
@@ -25,19 +25,20 @@ permissions:
             donexpress.admin.checkvc: true
             donexpress.admin.add: true
             donexpress.admin.delete: true
-            donexpress.admin.dbconnect: true
             donexpress.admin.addvc: true
+            donexpress.admin.remove: true
             donexpress.admin.reload: true
             donexpress.admin.setvc: true
             donexpress.admin.recent: true
             donexpress.admin.update: true
+            donexpress.admin.signremove: true
+            donexpress.admin.signplace: true
             donexpress.user: true
     donexpress.admin.basic:
         description: Basic access to admin commands. Gives checkvc and update notifications
         default: op
         children:
             donexpress.admin.checkvc: true
-            donexpress.admin.dbconnect: true
             donexpress.admin.update: true
     donexpress.admin.add:
         description: Adds a rank to the config
@@ -48,11 +49,14 @@ permissions:
     donexpress.admin.checkvc:
         description: Checks the amount of virtual currency that a player has
         default: op
+    donexpress.admin.checkp:
+        description: 
+        default:
     donexpress.admin.addvc:
         description: Adds virtual currency to a specified user
         default: op
-    donexpress.admin.dbconnect:
-        description: Manually connects to the database if its not working. 
+    donexpress.admin.remove:
+        description: Removes virtual currency from a user
         default: op
     donexpress.admin.reload:
         description: Reloads the config
@@ -65,6 +69,12 @@ permissions:
         default: op
     donexpress.admin.update:
         description: Notifies the user about an update
+        default: op
+    donexpress.admin.signplace:
+        description: Allows a sign with [DE] as the first line to be placed
+        default: op
+    donexpress.admin.signremove:
+        description: Allows a sign with [DE] as the first line to be destroyed
         default: op
     donexpress.user:
         description: Any commands that a user would use

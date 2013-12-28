@@ -1,4 +1,4 @@
-package net.targetcraft.donatorexpress;
+package net.targetcraft.donatorexpress.test;
 
 /*
 * Updater for Bukkit.

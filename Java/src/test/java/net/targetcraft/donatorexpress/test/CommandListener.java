@@ -1,4 +1,4 @@
-package net.targetcraft.donatorexpress;
+package net.targetcraft.donatorexpress.test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -227,7 +227,7 @@ public class CommandListener implements Listener, CommandExecutor {
 			}
 			else if(args[0].equalsIgnoreCase("confirmdel"))
 			{
-				if(sender.hasPermission("donexpress.admin.delete"))
+				if(sender.hasPermission("donexpress.admin.del"))
 				{
 					String packageName=confirmDel.get("confirm");
 					List<String> stuffToRemove=confirmDel2.get("confirm2");
@@ -507,11 +507,11 @@ public class CommandListener implements Listener, CommandExecutor {
 				Database.close();
 			}
 			
-			else if(args[0].equalsIgnoreCase("removevc"))
+			else if(args[0].equalsIgnoreCase("remove"))
 			{
 				Database.connect();
 				
-				if(sender.hasPermission("donexpress.admin.removevc"))
+				if(sender.hasPermission("donexpress.admin.remove"))
 				{
 					String website=plugin.getConfig().getString("portal-location");
 					String VCName=plugin.getConfig().getString("currency-name");
@@ -1434,10 +1434,7 @@ public class CommandListener implements Listener, CommandExecutor {
 			sender.sendMessage(ChatColor.GOLD + "/donate delete [package]");
 			sender.sendMessage(ChatColor.GOLD + "/donate confirmdel");
 		}
-		if (sender.hasPermission("donexpress.admin.check["))
-		{
-			sender.sendMessage(ChatColor.GOLD + "/donate checkp [player]");
-		}		if (sender.hasPermission("donexpress.admin.addvc")) {
+		if (sender.hasPermission("donexpress.admin.addvc")) {
 			sender.sendMessage(ChatColor.GOLD
 					+ "/donate addvc [username] [amount]");
 		}
